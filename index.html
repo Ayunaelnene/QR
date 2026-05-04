@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nelson Mendoza QR(vCard)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        #qrcode { background: white; padding: 15px; border-radius: 16px; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-10">
+<div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 text-center">
+        <h1 class="text-3xl font-bold">Generador de Contacto QR</h1>
+        <p class="mt-2 opacity-90">Llena tus datos y genera un QR que cualquiera pueda escanear para guardarte</p>
+    </div>
+
+    <div class="p-8">
+        <!-- FORMULARIO -->
+        <form id="contactForm">
+            <div class="grid grid-cols-2 gap-6">
+                <div class="col-span-2 md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+                    <input id="nombre" type="text" required
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="col-span-2 md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Apellido</label>
+                    <input id="apellido" type="text" required
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                    <input id="telefono" type="tel" required
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Celular / WhatsApp</label>
+                    <input id="celular" type="tel"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
+                    <input id="email" type="email"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Empresa</label>
+                    <input id="empresa" type="text"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cargo / Puesto</label>
+                    <input id="cargo" type="text"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+                    <input id="direccion" type="text"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+                    <input id="web" type="url" placeholder="https://tudominio.com"
+                           class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <button type="button" onclick="generarQR()"
+                    class="mt-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-3xl text-xl font-semibold hover:brightness-110 transition">
+                Generar Código QR
+            </button>
+        </form>
+
+        <!-- RESULTADO QR -->
+        <div id="resultado" class="hidden mt-10 text-center">
+            <h2 class="text-2xl font-semibold mb-6">¡Tu Código QR está listo!</h2>
+            
+            <div id="qrcode" class="mx-auto inline-block"></div>
+            
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="descargarQR()" 
+                        class="px-8 py-4 bg-green-600 text-white rounded-3xl font-medium hover:bg-green-700 transition">
+                    Descargar QR (PNG)
+                </button>
+                <button onclick="descargarVCard()" 
+                        class="px-8 py-4 bg-slate-700 text-white rounded-3xl font-medium hover:bg-slate-800 transition">
+                    Descargar vCard
+                </button>
+            </div>
+            
+            <p class="text-sm text-slate-500 mt-6">
+                Escanea este código con cualquier celular → se abrirá automáticamente la opción de "Guardar Contacto"
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====================== GENERAR vCARD ======================
+function generarVCard() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const apellido = document.getElementById('apellido').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const celular = document.getElementById('celular').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const empresa = document.getElementById('empresa').value.trim();
+    const cargo = document.getElementById('cargo').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+    const web = document.getElementById('web').value.trim();
+
+    let vcard = `BEGIN:VCARD
+VERSION:3.0
+N:${apellido};${nombre};;;
+FN:${nombre} ${apellido}
+`;
+
+    if (telefono) vcard += `TEL;TYPE=WORK,VOICE:${telefono}\n`;
+    if (celular) vcard += `TEL;TYPE=CELL:${celular}\n`;
+    if (email) vcard += `EMAIL;TYPE=WORK:${email}\n`;
+    if (empresa) vcard += `ORG:${empresa}\n`;
+    if (cargo) vcard += `TITLE:${cargo}\n`;
+    if (direccion) vcard += `ADR;TYPE=HOME:;;${direccion};;;;\n`;
+    if (web) vcard += `URL:${web}\n`;
+
+    vcard += `END:VCARD`;
+
+    return vcard;
+}
+
+// ====================== GENERAR QR ======================
+let qrCodeInstance = null;
+
+function generarQR() {
+    const form = document.getElementById('contactForm');
+    if (!form.checkValidity()) {
+        alert("Por favor completa los campos obligatorios (Nombre, Apellido y Teléfono)");
+        return;
+    }
+
+    const vcard = generarVCard();
+    
+    // Limpiar QR anterior
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = '';
+    
+    // Generar nuevo QR
+    qrCodeInstance = new QRCode(qrContainer, {
+        text: vcard,
+        width: 280,
+        height: 280,
+        colorDark: "#1e40af",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById('resultado').classList.remove('hidden');
+    window.scrollTo({ top: document.getElementById('resultado').offsetTop - 50, behavior: 'smooth' });
+}
+
+// ====================== DESCARGAS ======================
+function descargarQR() {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) return;
+    
+    const link = document.createElement('a');
+    link.download = 'mi-contacto-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+function descargarVCard() {
+    const vcard = generarVCard();
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'contacto.vcf';
+    link.click();
+}
+
+// Opcional: Enter para generar
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') generarQR();
+});
+</script>
+</body>
+</html>
